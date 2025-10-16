@@ -18,9 +18,3 @@ SaveSnap is an After Effects ScriptUI tool that saves the current composition fr
    - **Export to** – Choose the output folder (use the folder button to browse).
    - **Auto-close after export** – Close the palette automatically after a successful export (panel mode hides instead of closing).
 3. Press **Export** to save the PNG. Use **Cancel** to close (or hide) the UI.
-
-## Notes
-
-- Preferences (resolution, naming, path, auto-close) are stored via pp.settings and persist between sessions.
-- Each export is wrapped in an Undo group; you can revert with Ctrl/Cmd + Z.
-- Controls expand when you resize the palette or docked panel.

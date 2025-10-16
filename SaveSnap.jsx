@@ -1,6 +1,6 @@
 /**
  * SaveSnap.jsx
- * @version 1.0.2
+ * @version 1.0.0
  * @author tatoutools
  * @description Tool for exporting the current composition frame to PNG
  */
@@ -475,7 +475,7 @@
             versionGroup.orientation = "row";
             versionGroup.alignChildren = ["right", "center"];
             versionGroup.alignment = ["fill", "top"];
-            var versionText = versionGroup.add("statictext", undefined, "ver1.0.2");
+            var versionText = versionGroup.add("statictext", undefined, "ver1.0.0");
             versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
             versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
         }
