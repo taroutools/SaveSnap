@@ -5,7 +5,7 @@
  * @description コンポジションの現在フレームをPNG形式で保存するツール
  */
 
-(function() {
+(function(thisObj) {
     //====================================
     // 定数と設定
     //====================================
@@ -239,9 +239,13 @@
     /**
      * UIを構築して表示
      */
-    function buildInterface() {
+    function buildInterface(thisObj) {
         // メインウィンドウの作成
-        var win = new Window("palette", APP_NAME, undefined, {resizeable: false});
+        var win = (thisObj instanceof Panel) ? thisObj : new Window("palette", APP_NAME, undefined, {resizeable: true});
+
+        if (win instanceof Panel) {
+            win.text = APP_NAME;
+        }
         win.orientation = "column";
         win.alignChildren = "fill";
         win.spacing = 10;
@@ -249,6 +253,8 @@
         
         // フォーマット
         var formatGroup = win.add("group");
+        formatGroup.alignChildren = ["left", "center"];
+        formatGroup.alignment = ["fill", "top"];
         formatGroup.orientation = "row";
         formatGroup.margins = UI_SIZES.GROUP_MARGIN;
         formatGroup.spacing = UI_SIZES.SPACING;
@@ -257,6 +263,8 @@
         formatLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
         
         var formatList = formatGroup.add("dropdownlist", undefined, ["PNG"]);
+        formatList.alignment = ["fill", "center"];
+        formatList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         formatList.preferredSize.width = UI_SIZES.DROPDOWN_WIDTH;
         formatList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         formatList.selection = 0;
@@ -264,6 +272,8 @@
         
         // 解像度
         var resolutionGroup = win.add("group");
+        resolutionGroup.alignChildren = ["left", "center"];
+        resolutionGroup.alignment = ["fill", "top"];
         resolutionGroup.orientation = "row";
         resolutionGroup.margins = UI_SIZES.GROUP_MARGIN;
         resolutionGroup.spacing = UI_SIZES.SPACING;
@@ -279,12 +289,16 @@
         ];
         
         var resolutionList = resolutionGroup.add("dropdownlist", undefined, resolutionOptions);
+        resolutionList.alignment = ["fill", "center"];
+        resolutionList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         resolutionList.preferredSize.width = UI_SIZES.DROPDOWN_WIDTH;
         resolutionList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         resolutionList.selection = parseInt(getUserPref("resolution", 0)) || 0;
         
         // ファイル名
         var namingGroup = win.add("group");
+        namingGroup.alignChildren = ["left", "center"];
+        namingGroup.alignment = ["fill", "top"];
         namingGroup.orientation = "row";
         namingGroup.margins = UI_SIZES.GROUP_MARGIN;
         namingGroup.spacing = UI_SIZES.SPACING;
@@ -300,12 +314,16 @@
         ];
         
         var namingList = namingGroup.add("dropdownlist", undefined, namingOptions);
+        namingList.alignment = ["fill", "center"];
+        namingList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         namingList.preferredSize.width = UI_SIZES.DROPDOWN_WIDTH;
         namingList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         namingList.selection = parseInt(getUserPref("naming", 0)) || 0;
         
         // カスタム
         var customGroup = win.add("group");
+        customGroup.alignChildren = ["left", "center"];
+        customGroup.alignment = ["fill", "top"];
         customGroup.orientation = "row";
         customGroup.margins = UI_SIZES.GROUP_MARGIN;
         customGroup.spacing = UI_SIZES.SPACING;
@@ -316,6 +334,8 @@
         
         // カスタムフィールドは空欄に修正
         var customField = customGroup.add("edittext", undefined, "");
+        customField.alignment = ["fill", "center"];
+        customField.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         customField.preferredSize.width = UI_SIZES.EDIT_WIDTH;
         customField.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         
@@ -325,6 +345,8 @@
         
         // 出力先
         var outputGroup = win.add("group");
+        outputGroup.alignChildren = ["left", "center"];
+        outputGroup.alignment = ["fill", "top"];
         outputGroup.orientation = "row";
         outputGroup.margins = UI_SIZES.GROUP_MARGIN;
         outputGroup.spacing = UI_SIZES.SPACING;
@@ -334,17 +356,21 @@
         
         // edittextに戻す（手入力・コピペ可能）
         var outputPath = outputGroup.add("edittext", undefined, getUserPref("path", Folder.desktop.fsName));
+        outputPath.alignment = ["fill", "center"];
+        outputPath.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         outputPath.preferredSize.width = UI_SIZES.EDIT_WIDTH;
         outputPath.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         
         var browseButton = outputGroup.add("button", undefined, "🗀");
+        browseButton.alignment = ["right", "center"];
         browseButton.preferredSize.width = UI_SIZES.SMALL_BTN_WIDTH;
         browseButton.preferredSize.height = UI_SIZES.SMALL_BTN_HEIGHT;
         
         // オプション
         var optionsGroup = win.add("group");
+        optionsGroup.alignChildren = ["left", "center"];
+        optionsGroup.alignment = ["fill", "top"];
         optionsGroup.orientation = "row";
-        optionsGroup.alignment = "left";
         optionsGroup.margins = [UI_SIZES.LABEL_WIDTH + 10, 8, 0, 15];
         
         var autoCloseOption = optionsGroup.add("checkbox", undefined, 
@@ -354,8 +380,9 @@
         
         // ボタン
         var buttonGroup = win.add("group");
+        buttonGroup.alignChildren = ["right", "center"];
+        buttonGroup.alignment = ["fill", "top"];
         buttonGroup.orientation = "row";
-        buttonGroup.alignment = "right";
         buttonGroup.margins = [0, 10, 15, 0];
         buttonGroup.spacing = 15;
         
@@ -419,7 +446,11 @@
         
         // キャンセルボタン
         cancelButton.onClick = function() {
-            win.close();
+            if (win instanceof Panel) {
+                win.visible = false;
+            } else {
+                win.close();
+            }
         };
         
         // エクスポートボタン
@@ -433,19 +464,28 @@
                 customField.text
             );
             
-            if (success && autoCloseOption.value) {
+            if (success && autoCloseOption.value && !(win instanceof Panel)) {
                 win.close();
             }
         };
         
         // バージョン情報
-        var versionGroup = win.add("group");
-        versionGroup.orientation = "row";
-        versionGroup.alignment = "right";
-        var versionText = versionGroup.add("statictext", undefined, "ver1.0.2");
-        versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
-        versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
-        
+        if (!(win instanceof Panel)) {
+            var versionGroup = win.add("group");
+            versionGroup.orientation = "row";
+            versionGroup.alignChildren = ["right", "center"];
+            versionGroup.alignment = ["fill", "top"];
+            var versionText = versionGroup.add("statictext", undefined, "ver1.0.2");
+            versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
+            versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
+        }
+
+        win.layout.layout(true);
+        win.layout.resize();
+        if (!(win instanceof Panel)) {
+            win.minimumSize = win.size;
+        }
+
         win.onResizing = win.onResize = function() {
             this.layout.resize();
         };
@@ -456,12 +496,18 @@
     //====================================
     // メイン実行部
     //====================================
+
+    var panel = buildInterface(thisObj);
+
     if (!app.project) {
         alert(localize(
             "Please open a project first.",
             "プロジェクトを開いてください。"
         ));
-    } else {
-        buildInterface().show();
     }
-})();
+
+    if (panel instanceof Window && !(panel instanceof Panel)) {
+        panel.center();
+        panel.show();
+    }
+})(this);
