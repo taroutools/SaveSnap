@@ -1,19 +1,19 @@
 /**
  * SaveSnap.jsx
  * @version 1.0.2
- * @author AE Buddy
- * @description コンポジションの現在フレームをPNG形式で保存するツール
+ * @author tatoutools
+ * @description Tool for exporting the current composition frame to PNG
  */
 
 (function(thisObj) {
     //====================================
-    // 定数と設定
+    // Constants and configuration
     //====================================
     var APP_NAME = "SaveSnap";
     var CONFIG_SECTION = "SaveSnap";
     var EXTENSION = ".png";
     
-    // UIサイズ定数
+    // UI size constants
     var UI_SIZES = {
         LABEL_WIDTH: 70,
         DROPDOWN_WIDTH: 200,
@@ -29,33 +29,33 @@
     };
 
     //====================================
-    // ユーティリティ関数
+    // Utility functions
     //====================================
     
     /**
-     * 言語に応じたテキストを取得
-     * @param {String} enText - 英語テキスト
-     * @param {String} jpText - 日本語テキスト
-     * @return {String} 言語に応じたテキスト
+     * Retrieve localized text based on the application language
+     * @param {String} enText - English text
+     * @param {String} jpText - Japanese text
+     * @return {String} Localized text
      */
     function localize(enText, jpText) {
         return (app.language === Language.JAPANESE) ? jpText : enText;
     }
     
     /**
-     * 設定を保存
-     * @param {String} key - 設定キー
-     * @param {any} value - 設定値
+     * Persist a user preference
+     * @param {String} key - Preference key
+     * @param {any} value - Preference value
      */
     function saveUserPref(key, value) {
         app.settings.saveSetting(CONFIG_SECTION, key, value);
     }
     
     /**
-     * 設定を読み込み
-     * @param {String} key - 設定キー
-     * @param {any} defaultValue - デフォルト値
-     * @return {any} 設定値
+     * Read a user preference
+     * @param {String} key - Preference key
+     * @param {any} defaultValue - Default value
+     * @return {any} Stored preference value
      */
     function getUserPref(key, defaultValue) {
         if (!app.settings.haveSetting(CONFIG_SECTION, key)) {
@@ -65,10 +65,10 @@
     }
     
     /**
-     * フレーム番号をタイムコードに変換
-     * @param {Number} frameCount - フレーム数
-     * @param {Number} fps - フレームレート
-     * @return {String} タイムコード（hh:mm:ss:ff）
+     * Convert a frame count to a timecode string
+     * @param {Number} frameCount - Frame count
+     * @param {Number} fps - Frame rate
+     * @return {String} Timecode in hh:mm:ss:ff format
      */
     function convertFrameToTimecode(frameCount, fps) {
         var totalSec = Math.floor(frameCount / fps);
@@ -85,19 +85,19 @@
     }
     
     /**
-     * ファイル名から無効な文字を除去
-     * @param {String} name - 元のファイル名
-     * @return {String} 安全なファイル名
+     * Remove invalid characters from file names
+     * @param {String} name - Original file name
+     * @return {String} Sanitized file name
      */
     function cleanupFilename(name) {
         return name.replace(/[\/\?<>\\:\*\|":]/g, "");
     }
 
     /**
-     * フレーム番号をパッド付きの文字列に変換
-     * @param {Number} frameNum - フレーム番号
-     * @param {Number} padLength - パッドする長さ（デフォルト3）
-     * @return {String} パッド付きフレーム番号
+     * Convert a frame number to a padded string
+     * @param {Number} frameNum - Frame number
+     * @param {Number} padLength - Length of padding (default: 3)
+     * @return {String} Padded frame identifier
      */
     function padFrameNumber(frameNum, padLength) {
         padLength = padLength || 3;
@@ -109,14 +109,14 @@
     }
 
     //====================================
-    // CompItemの拡張
+    // CompItem extensions
     //====================================
     
     /**
-     * PNG画像として保存する拡張メソッド
-     * @param {File} fileObj - 保存先ファイルオブジェクト
-     * @param {Array} res - 解像度係数 [横, 縦]
-     * @return {Boolean} 成功したかどうか
+     * Save the current frame as a PNG image
+     * @param {File} fileObj - Destination file object
+     * @param {Array} res - Resolution factor [width, height]
+     * @return {Boolean} Whether the export succeeded
      */
     CompItem.prototype.exportAsPNG = function(fileObj, res) {
         var currentRes = this.resolutionFactor;
@@ -133,22 +133,22 @@
     };
 
     //====================================
-    // メイン処理
+    // Main processing
     //====================================
     
     /**
-     * スクリーンショット保存処理
-     * @param {Number} resolutionOption - 解像度オプション
-     * @param {Number} namingOption - 命名規則オプション
-     * @param {String} outputPath - 出力先パス
-     * @param {String} customPattern - カスタム命名パターン
-     * @return {Boolean} 成功したかどうか
+     * Export the current frame as a PNG file
+     * @param {Number} resolutionOption - Resolution option index
+     * @param {Number} namingOption - Naming option index
+     * @param {String} outputPath - Output folder path
+     * @param {String} customPattern - Custom naming pattern
+     * @return {Boolean} Whether the export succeeded
      */
     function processExport(resolutionOption, namingOption, outputPath, customPattern) {
-        // アクティブなコンポジションを取得
+        // Fetch the active composition
         var activeComp = app.project.activeItem;
         
-        // コンポジションチェック
+        // Validate composition selection
         if (!(activeComp && activeComp instanceof CompItem)) {
             alert(localize(
                 "Please select a composition first.",
@@ -157,7 +157,7 @@
             return false;
         }
         
-        // 出力先フォルダチェック
+        // Validate output folder
         var outputFolder = new Folder(outputPath);
         if (!outputFolder.exists) {
             alert(localize(
@@ -167,35 +167,35 @@
             return false;
         }
         
-        // 解像度設定
+        // Determine resolution factor
         var resolutionFactor;
         switch (resolutionOption) {
-            case 0: resolutionFactor = [1, 1]; break; // フル
-            case 1: resolutionFactor = [2, 2]; break; // 1/2
-            case 2: resolutionFactor = [3, 3]; break; // 1/3
-            case 3: resolutionFactor = [4, 4]; break; // 1/4
+            case 0: resolutionFactor = [1, 1]; break; // Full resolution
+            case 1: resolutionFactor = [2, 2]; break; // Half resolution
+            case 2: resolutionFactor = [3, 3]; break; // Third resolution
+            case 3: resolutionFactor = [4, 4]; break; // Quarter resolution
             default: resolutionFactor = [1, 1];
         }
         
-        // ファイル名の作成
+        // Build file name
         var baseFilename = cleanupFilename(activeComp.name);
         var frameNum = Math.floor((activeComp.time + activeComp.displayStartTime) * activeComp.frameRate);
         var timecodeStr = convertFrameToTimecode(frameNum, activeComp.frameRate);
         var filename;
         
         switch (namingOption) {
-            case 0: // コンポジション名
+            case 0: // Composition name
                 filename = baseFilename + EXTENSION;
                 break;
-            case 1: // コンポジション名 + フレーム番号 (fXXX形式)
+            case 1: // Composition name + frame number (fXXX)
                 filename = baseFilename + "_" + padFrameNumber(frameNum) + EXTENSION;
                 break;
-            case 2: // コンポジション名 + タイムコード
+            case 2: // Composition name + timecode
                 filename = baseFilename + "_" + timecodeStr.replace(/:/g, "-") + EXTENSION;
                 break;
-            case 3: // カスタム
+            case 3: // Custom naming
                 if (customPattern && customPattern.length > 0) {
-                    // 変数置換
+                    // Replace tokens
                     var customName = customPattern
                         .replace(/\${compName}/g, activeComp.name)
                         .replace(/\${frame}/g, frameNum.toString())
@@ -209,11 +209,11 @@
                 filename = baseFilename + EXTENSION;
         }
         
-        // ファイルパスの作成
+        // Build file path
         var fullPath = outputPath + "/" + filename;
         var outputFile = new File(fullPath);
         
-        // PNG保存処理
+        // Perform PNG export
         app.beginUndoGroup(APP_NAME);
         try {
             if (activeComp.exportAsPNG(outputFile, resolutionFactor)) {
@@ -233,14 +233,14 @@
     }
 
     //====================================
-    // UI構築
+    // UI construction
     //====================================
     
     /**
-     * UIを構築して表示
+     * Build and display the UI
      */
     function buildInterface(thisObj) {
-        // メインウィンドウの作成
+        // Create main window
         var win = (thisObj instanceof Panel) ? thisObj : new Window("palette", APP_NAME, undefined, {resizeable: true});
 
         if (win instanceof Panel) {
@@ -251,7 +251,7 @@
         win.spacing = 10;
         win.margins = UI_SIZES.MARGIN;
         
-        // フォーマット
+        // Format selection
         var formatGroup = win.add("group");
         formatGroup.alignChildren = ["left", "center"];
         formatGroup.alignment = ["fill", "top"];
@@ -270,7 +270,7 @@
         formatList.selection = 0;
         formatList.enabled = false;
         
-        // 解像度
+        // Resolution selection
         var resolutionGroup = win.add("group");
         resolutionGroup.alignChildren = ["left", "center"];
         resolutionGroup.alignment = ["fill", "top"];
@@ -295,7 +295,7 @@
         resolutionList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         resolutionList.selection = parseInt(getUserPref("resolution", 0)) || 0;
         
-        // ファイル名
+        // Naming selection
         var namingGroup = win.add("group");
         namingGroup.alignChildren = ["left", "center"];
         namingGroup.alignment = ["fill", "top"];
@@ -320,7 +320,7 @@
         namingList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         namingList.selection = parseInt(getUserPref("naming", 0)) || 0;
         
-        // カスタム
+        // Custom naming
         var customGroup = win.add("group");
         customGroup.alignChildren = ["left", "center"];
         customGroup.alignment = ["fill", "top"];
@@ -332,7 +332,7 @@
         var customLabel = customGroup.add("statictext", undefined, localize("Custom:", "カスタム:"));
         customLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
         
-        // カスタムフィールドは空欄に修正
+        // Keep custom field blank by default
         var customField = customGroup.add("edittext", undefined, "");
         customField.alignment = ["fill", "center"];
         customField.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
@@ -343,7 +343,7 @@
         helpButton.preferredSize.width = UI_SIZES.SMALL_BTN_WIDTH;
         helpButton.preferredSize.height = UI_SIZES.SMALL_BTN_HEIGHT;
         
-        // 出力先
+        // Output destination
         var outputGroup = win.add("group");
         outputGroup.alignChildren = ["left", "center"];
         outputGroup.alignment = ["fill", "top"];
@@ -354,7 +354,7 @@
         var outputLabel = outputGroup.add("statictext", undefined, localize("Export to:", "出力先:"));
         outputLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
         
-        // edittextに戻す（手入力・コピペ可能）
+        // Use edittext to allow manual input and copy/paste
         var outputPath = outputGroup.add("edittext", undefined, getUserPref("path", Folder.desktop.fsName));
         outputPath.alignment = ["fill", "center"];
         outputPath.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
@@ -366,7 +366,7 @@
         browseButton.preferredSize.width = UI_SIZES.SMALL_BTN_WIDTH;
         browseButton.preferredSize.height = UI_SIZES.SMALL_BTN_HEIGHT;
         
-        // オプション
+        // Options
         var optionsGroup = win.add("group");
         optionsGroup.alignChildren = ["left", "center"];
         optionsGroup.alignment = ["fill", "top"];
@@ -378,7 +378,7 @@
         autoCloseOption.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         autoCloseOption.value = (getUserPref("autoClose", "false") === "true");
         
-        // ボタン
+        // Buttons
         var buttonGroup = win.add("group");
         buttonGroup.alignChildren = ["right", "center"];
         buttonGroup.alignment = ["fill", "top"];
@@ -397,32 +397,32 @@
         cancelButton.active = false;
         
         //====================================
-        // イベントハンドラ
+        // Event handlers
         //====================================
         
-        // ファイル名ドロップダウン変更
+        // Naming dropdown change
         namingList.onChange = function() {
             customGroup.enabled = (this.selection.index === 3);
             saveUserPref("naming", this.selection.index);
         };
         
-        // 解像度ドロップダウン変更
+        // Resolution dropdown change
         resolutionList.onChange = function() {
             saveUserPref("resolution", this.selection.index);
         };
         
-        // カスタムフィールド変更
+        // Custom field change
         customField.onChange = function() {
-            // カスタム名前の設定は保存しない（毎回リセットするため）
-            // 変更イベントは残しておくが、saveUserPrefは呼び出さない
+            // Do not persist custom naming because it resets each session
+            // Keep the callback for validation but skip saveUserPref
         };
         
-        // 出力先パス変更
+        // Output path change
         outputPath.onChange = function() {
             saveUserPref("path", this.text);
         };
         
-        // ヘルプボタン
+        // Help button
         helpButton.onClick = function() {
             alert(localize(
                 "Available tokens:\n\n${compName} - Composition Name\n${frame} - Frame Number\n${tc} - Timecode",
@@ -430,7 +430,7 @@
             ));
         };
         
-        // 参照ボタン
+        // Browse button
         browseButton.onClick = function() {
             var currentFolder = new Folder(outputPath.text);
             var selectedFolder = currentFolder.selectDlg(localize(
@@ -439,12 +439,12 @@
             ));
             
             if (selectedFolder) {
-                outputPath.text = selectedFolder.fsName; // edittextのtextプロパティを更新
+                outputPath.text = selectedFolder.fsName; // Update the edittext text property
                 saveUserPref("path", selectedFolder.fsName);
             }
         };
         
-        // キャンセルボタン
+        // Cancel button
         cancelButton.onClick = function() {
             if (win instanceof Panel) {
                 win.visible = false;
@@ -453,7 +453,7 @@
             }
         };
         
-        // エクスポートボタン
+        // Export button
         exportButton.onClick = function() {
             saveUserPref("autoClose", autoCloseOption.value);
             
@@ -469,7 +469,7 @@
             }
         };
         
-        // バージョン情報
+        // Version info
         if (!(win instanceof Panel)) {
             var versionGroup = win.add("group");
             versionGroup.orientation = "row";
@@ -494,7 +494,7 @@
     }
     
     //====================================
-    // メイン実行部
+    // Entry point
     //====================================
 
     var panel = buildInterface(thisObj);
