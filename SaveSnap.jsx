@@ -5,7 +5,7 @@
  * @description コンポジションの現在フレームをPNG形式で保存するツール
  */
 
-(function(thisObj) {
+(function() {
     //====================================
     // 定数と設定
     //====================================
@@ -239,30 +239,19 @@
     /**
      * UIを構築して表示
      */
-    function buildInterface(thisObj) {
+    function buildInterface() {
         // メインウィンドウの作成
-        var win = (thisObj instanceof Panel) ? thisObj : new Window("palette", APP_NAME, undefined, {resizeable: true});
-        if (win instanceof Panel) {
-            win.text = APP_NAME;
-        }
+        var win = new Window("palette", APP_NAME, undefined, {resizeable: false});
         win.orientation = "column";
         win.alignChildren = "fill";
         win.spacing = 10;
         win.margins = UI_SIZES.MARGIN;
         
-        // 共通の横並びグループを作成する小さなヘルパー
-        function createRow(parent, margins, spacing) {
-            var group = parent.add("group");
-            group.orientation = "row";
-            group.margins = margins || UI_SIZES.GROUP_MARGIN;
-            group.spacing = (typeof spacing === "number") ? spacing : UI_SIZES.SPACING;
-            group.alignChildren = ["left", "center"];
-            group.alignment = ["fill", "top"];
-            return group;
-        }
-        
         // フォーマット
-        var formatGroup = createRow(win);
+        var formatGroup = win.add("group");
+        formatGroup.orientation = "row";
+        formatGroup.margins = UI_SIZES.GROUP_MARGIN;
+        formatGroup.spacing = UI_SIZES.SPACING;
         
         var formatLabel = formatGroup.add("statictext", undefined, localize("Format:", "フォーマット:"));
         formatLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
@@ -272,11 +261,12 @@
         formatList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         formatList.selection = 0;
         formatList.enabled = false;
-        formatList.alignment = ["fill", "center"];
-        formatList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         
         // 解像度
-        var resolutionGroup = createRow(win);
+        var resolutionGroup = win.add("group");
+        resolutionGroup.orientation = "row";
+        resolutionGroup.margins = UI_SIZES.GROUP_MARGIN;
+        resolutionGroup.spacing = UI_SIZES.SPACING;
         
         var resolutionLabel = resolutionGroup.add("statictext", undefined, localize("Resolution:", "解像度:"));
         resolutionLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
@@ -292,11 +282,12 @@
         resolutionList.preferredSize.width = UI_SIZES.DROPDOWN_WIDTH;
         resolutionList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         resolutionList.selection = parseInt(getUserPref("resolution", 0)) || 0;
-        resolutionList.alignment = ["fill", "center"];
-        resolutionList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         
         // ファイル名
-        var namingGroup = createRow(win);
+        var namingGroup = win.add("group");
+        namingGroup.orientation = "row";
+        namingGroup.margins = UI_SIZES.GROUP_MARGIN;
+        namingGroup.spacing = UI_SIZES.SPACING;
         
         var namingLabel = namingGroup.add("statictext", undefined, localize("Naming:", "ファイル名:"));
         namingLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
@@ -312,11 +303,12 @@
         namingList.preferredSize.width = UI_SIZES.DROPDOWN_WIDTH;
         namingList.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
         namingList.selection = parseInt(getUserPref("naming", 0)) || 0;
-        namingList.alignment = ["fill", "center"];
-        namingList.minimumSize = [UI_SIZES.DROPDOWN_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         
         // カスタム
-        var customGroup = createRow(win);
+        var customGroup = win.add("group");
+        customGroup.orientation = "row";
+        customGroup.margins = UI_SIZES.GROUP_MARGIN;
+        customGroup.spacing = UI_SIZES.SPACING;
         customGroup.enabled = (namingList.selection.index === 3);
         
         var customLabel = customGroup.add("statictext", undefined, localize("Custom:", "カスタム:"));
@@ -326,15 +318,16 @@
         var customField = customGroup.add("edittext", undefined, "");
         customField.preferredSize.width = UI_SIZES.EDIT_WIDTH;
         customField.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
-        customField.alignment = ["fill", "center"];
-        customField.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         
         var helpButton = customGroup.add("button", undefined, "?");
         helpButton.preferredSize.width = UI_SIZES.SMALL_BTN_WIDTH;
         helpButton.preferredSize.height = UI_SIZES.SMALL_BTN_HEIGHT;
         
         // 出力先
-        var outputGroup = createRow(win);
+        var outputGroup = win.add("group");
+        outputGroup.orientation = "row";
+        outputGroup.margins = UI_SIZES.GROUP_MARGIN;
+        outputGroup.spacing = UI_SIZES.SPACING;
         
         var outputLabel = outputGroup.add("statictext", undefined, localize("Export to:", "出力先:"));
         outputLabel.preferredSize.width = UI_SIZES.LABEL_WIDTH;
@@ -343,16 +336,16 @@
         var outputPath = outputGroup.add("edittext", undefined, getUserPref("path", Folder.desktop.fsName));
         outputPath.preferredSize.width = UI_SIZES.EDIT_WIDTH;
         outputPath.preferredSize.height = UI_SIZES.CONTROL_HEIGHT;
-        outputPath.alignment = ["fill", "center"];
-        outputPath.minimumSize = [UI_SIZES.EDIT_WIDTH, UI_SIZES.CONTROL_HEIGHT];
         
         var browseButton = outputGroup.add("button", undefined, "🗀");
         browseButton.preferredSize.width = UI_SIZES.SMALL_BTN_WIDTH;
         browseButton.preferredSize.height = UI_SIZES.SMALL_BTN_HEIGHT;
-        browseButton.alignment = ["right", "center"];
         
         // オプション
-        var optionsGroup = createRow(win, [UI_SIZES.LABEL_WIDTH + 10, 8, 0, 15]);
+        var optionsGroup = win.add("group");
+        optionsGroup.orientation = "row";
+        optionsGroup.alignment = "left";
+        optionsGroup.margins = [UI_SIZES.LABEL_WIDTH + 10, 8, 0, 15];
         
         var autoCloseOption = optionsGroup.add("checkbox", undefined, 
             localize("Auto-close after export", "エクスポート後に閉じる"));
@@ -360,8 +353,11 @@
         autoCloseOption.value = (getUserPref("autoClose", "false") === "true");
         
         // ボタン
-        var buttonGroup = createRow(win, [0, 10, 15, 0], 15);
-        buttonGroup.alignChildren = ["right", "center"];
+        var buttonGroup = win.add("group");
+        buttonGroup.orientation = "row";
+        buttonGroup.alignment = "right";
+        buttonGroup.margins = [0, 10, 15, 0];
+        buttonGroup.spacing = 15;
         
         var exportButton = buttonGroup.add("button", undefined, localize("Export", "エクスポート"));
         exportButton.preferredSize.width = UI_SIZES.BIG_BTN_WIDTH;
@@ -423,11 +419,7 @@
         
         // キャンセルボタン
         cancelButton.onClick = function() {
-            if (win instanceof Panel) {
-                win.visible = false;
-            } else {
-                win.close();
-            }
+            win.close();
         };
         
         // エクスポートボタン
@@ -441,26 +433,19 @@
                 customField.text
             );
             
-            if (success && autoCloseOption.value && !(win instanceof Panel)) {
+            if (success && autoCloseOption.value) {
                 win.close();
             }
         };
         
-        // バージョン情報（ドッキングせずパレット表示の場合のみ）
-        if (!(win instanceof Panel)) {
-            var versionGroup = createRow(win, [0, 0, 0, 0]);
-            versionGroup.alignChildren = ["right", "center"];
-            var versionText = versionGroup.add("statictext", undefined, "ver1.0.2");
-            versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
-            versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
-        }
+        // バージョン情報
+        var versionGroup = win.add("group");
+        versionGroup.orientation = "row";
+        versionGroup.alignment = "right";
+        var versionText = versionGroup.add("statictext", undefined, "ver1.0.2");
+        versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
+        versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
         
-        win.layout.layout(true);
-        win.layout.resize();
-        if (!(win instanceof Panel)) {
-            win.minimumSize = win.size;
-        }
-
         win.onResizing = win.onResize = function() {
             this.layout.resize();
         };
@@ -471,17 +456,12 @@
     //====================================
     // メイン実行部
     //====================================
-    var panel = buildInterface(thisObj);
-
     if (!app.project) {
         alert(localize(
             "Please open a project first.",
             "プロジェクトを開いてください。"
         ));
+    } else {
+        buildInterface().show();
     }
-
-    if (panel instanceof Window && !(panel instanceof Panel)) {
-        panel.center();
-        panel.show();
-    }
-})(this);
+})();
