@@ -1,6 +1,6 @@
 /**
  * SaveSnap.jsx
- * @version 1.0.0
+ * @version 1.0.1
  * @author tatoutools
  * @description Tool for exporting the current composition frame to PNG
  */
@@ -241,11 +241,7 @@
      */
     function buildInterface(thisObj) {
         // Create main window
-        var win = (thisObj instanceof Panel) ? thisObj : new Window("palette", APP_NAME, undefined, {resizeable: true});
-
-        if (win instanceof Panel) {
-            win.text = APP_NAME;
-        }
+        var win = (thisObj instanceof Panel) ? thisObj : new Window("palette", undefined, undefined, {resizeable: true});
         win.orientation = "column";
         win.alignChildren = "fill";
         win.spacing = 10;
@@ -383,8 +379,8 @@
         buttonGroup.alignChildren = ["right", "center"];
         buttonGroup.alignment = ["fill", "top"];
         buttonGroup.orientation = "row";
-        buttonGroup.margins = [0, 10, 15, 0];
-        buttonGroup.spacing = 15;
+        buttonGroup.margins = [12, 12, 18, 16];
+        buttonGroup.spacing = 18;
         
         var exportButton = buttonGroup.add("button", undefined, localize("Export", "エクスポート"));
         exportButton.preferredSize.width = UI_SIZES.BIG_BTN_WIDTH;
@@ -475,7 +471,7 @@
             versionGroup.orientation = "row";
             versionGroup.alignChildren = ["right", "center"];
             versionGroup.alignment = ["fill", "top"];
-            var versionText = versionGroup.add("statictext", undefined, "ver1.0.0");
+            var versionText = versionGroup.add("statictext", undefined, "ver1.0.1");
             versionText.graphics.foregroundColor = versionText.graphics.newPen(versionText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
             versionText.graphics.font = ScriptUI.newFont("Arial", "Regular", 9);
         }
